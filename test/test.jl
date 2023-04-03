@@ -21,13 +21,16 @@ function print_test_header(test_name)
     println(border)
 end
 
-function test_blah()
-    print_test_header("Blah")
+function test_account()
+    print_test_header("Account")
+    a1 = Account("bank", 1000.00)
+    println(a1)
+    println("a1: $a1")
 end
 
 
 function main()
-    test_blah()
+    test_account()
 end
 
 main()
