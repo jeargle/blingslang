@@ -9,7 +9,7 @@ using Printf
 using Random
 
 
-export Account
+export Account, AccountGroup
 
 """
 Account model.
@@ -22,6 +22,18 @@ end
 
 Base.show(io::IO, account::Account) = show(io, string(account.name, ": ", account.value))
 Base.show(io::IO, m::MIME"text/plain", account::Account) = show(io, m, string(account.name, ": ", account.value))
+
+"""
+AccountGroup model.
+"""
+struct AccountGroup
+    name::AbstractString
+    accounts::Array{Account, 1}
+    AccountGroup(name::AbstractString, accounts::Array{Account, 1}) = new(name, accounts)
+end
+
+Base.show(io::IO, ag::AccountGroup) = show(io, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
+Base.show(io::IO, m::MIME"text/plain", account::AccountGroup) = show(io, m, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 
 
 end
