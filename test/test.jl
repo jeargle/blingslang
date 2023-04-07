@@ -29,6 +29,14 @@ function test_account()
     a2 = Account("investments", 500.00, 0.08)
     println(a2)
     println("a2: $a2")
+
+    println("  week | value")
+    for t in 2:2:52
+        curr_val = value_at_time(a2, t/52.0)
+        @printf "  %4d | %7.2f\n" t curr_val
+    end
+
+    println()
 end
 
 function test_account_group()

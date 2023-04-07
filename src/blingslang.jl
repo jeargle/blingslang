@@ -10,6 +10,7 @@ using Random
 
 
 export Account, AccountGroup
+export value_at_time
 
 """
 Account model.
@@ -38,5 +39,21 @@ end
 Base.show(io::IO, ag::AccountGroup) = show(io, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 Base.show(io::IO, m::MIME"text/plain", account::AccountGroup) = show(io, m, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 
+
+"""
+    value_at_time(account, time)
+
+Get the future value for an Account.
+
+# Arguments
+- account::Account
+- time::Float64: fraction of a year
+
+# Returns
+- value of an Account after time has passed
+"""
+function value_at_time(account::Account, time::Float64)
+    return account.value * (1+account.growth_rate)^(time)
+end
 
 end
