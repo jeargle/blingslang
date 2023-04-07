@@ -17,7 +17,10 @@ Account model.
 struct Account
     name::AbstractString
     value::Float64
-    Account(name::AbstractString, value::Float64) = new(name, value)
+    growth_rate::Float64  # annual
+
+    Account(name::AbstractString, value::Float64) = new(name, value, 0.0)
+    Account(name::AbstractString, value::Float64, growth_rate::Float64) = new(name, value, growth_rate)
 end
 
 Base.show(io::IO, account::Account) = show(io, string(account.name, ": ", account.value))

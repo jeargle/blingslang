@@ -26,6 +26,9 @@ function test_account()
     a1 = Account("bank", 1000.00)
     println(a1)
     println("a1: $a1")
+    a2 = Account("investments", 500.00, 0.08)
+    println(a2)
+    println("a2: $a2")
 end
 
 function test_account_group()
