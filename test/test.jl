@@ -23,6 +23,7 @@ end
 
 function test_account()
     print_test_header("Account")
+
     a1 = Account("bank", 1000.00)
     println(a1)
     println("a1: $a1")
@@ -41,18 +42,33 @@ end
 
 function test_account_group()
     print_test_header("AccountGroup")
+
     a1 = Account("bank", 1000.00)
     a2 = Account("house", 250000.00)
     a3 = Account("retirement", 60000.00)
     ag1 = AccountGroup("net_worth", [a1, a2, a3])
     println(ag1)
     println("ag1: $ag1")
+
+    println()
+end
+
+function test_read_system_file()
+    print_test_header("read_system_file()")
+
+    system = read_system_file("./systems/system1.yml")
+    for ag in system
+        println(ag)
+    end
+
+    println()
 end
 
 
 function main()
     test_account()
     test_account_group()
+    test_read_system_file()
 end
 
 main()
