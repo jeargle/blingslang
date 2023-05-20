@@ -4,6 +4,8 @@
 
 module blingslang
 
+using Dates
+
 using Plots
 using Printf
 using Random
@@ -11,7 +13,7 @@ using YAML
 
 
 export Account, AccountGroup, BlingTrajectory
-export value_at_time, read_system_file
+export value_at_time, current_value, read_system_file
 
 """
 Account model.
@@ -47,10 +49,11 @@ struct BlingTrajectory
     name::AbstractString
     accounts::AccountGroup
     step_count::Int
+    start_date::Date
     # trajectories::Array{Float64, 2}
     # event_counters
 
-    BlingTrajectory(name::AbstractString, account::AccountGroup) = new(name, accounts, 0)
+    BlingTrajectory(name::AbstractString, accounts::AccountGroup) = new(name, accounts, 0, Dates.today())
 end
 
 Base.show(io::IO, bt::BlingTrajectory) = show(io, bt.name)
@@ -73,6 +76,36 @@ function value_at_time(account::Account, time::Float64)
     return account.value * (1.0 + account.growth_rate)^time
 end
 
+
+"""
+    current_value(account_group)
+
+Get the value of an AccountGroup.
+
+# Arguments
+- account_group::AccountGroup
+
+# Returns
+- total value of all Accounts in AccountGroup
+"""
+function current_value(account_group::AccountGroup)
+    return sum([a.value for a in account_group.accounts])
+end
+
+"""
+    current_value(traj)
+
+Get the value of an BlingTrajectory.
+
+# Arguments
+- traj::BlingTrajectory
+
+# Returns
+- total value of all Accounts in a BlingTrajectory
+"""
+function current_value(traj::BlingTrajectory)
+    return current_value(traj.accounts)
+end
 
 """
     read_system_file(filename)
