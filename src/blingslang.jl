@@ -6,6 +6,7 @@ module blingslang
 
 using Dates
 
+using DataFrames
 using Plots
 using Printf
 using Random
@@ -13,7 +14,8 @@ using YAML
 
 
 export Account, AccountGroup, BlingTrajectory
-export value_at_time, current_value, read_system_file
+export value_at_time, current_value, simulate, read_system_file
+
 
 """
 Account model.
@@ -30,6 +32,7 @@ end
 Base.show(io::IO, account::Account) = show(io, string(account.name, ": ", account.value))
 Base.show(io::IO, m::MIME"text/plain", account::Account) = show(io, m, string(account.name, ": ", account.value))
 
+
 """
 AccountGroup model.
 """
@@ -42,18 +45,32 @@ end
 Base.show(io::IO, ag::AccountGroup) = show(io, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 Base.show(io::IO, m::MIME"text/plain", account::AccountGroup) = show(io, m, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 
+
 """
 Value over time for all Accounts in an AccountGroup.
 """
 struct BlingTrajectory
     name::AbstractString
-    accounts::AccountGroup
+    account_group::AccountGroup
     step_count::Int
     start_date::Date
-    # trajectories::Array{Float64, 2}
+    trajectories::DataFrame
     # event_counters
 
-    BlingTrajectory(name::AbstractString, accounts::AccountGroup) = new(name, accounts, 0, Dates.today())
+    function BlingTrajectory(name::AbstractString, account_group::AccountGroup)
+        names = [:date]
+        start_date = Dates.today()
+        values = Vector{Any}([start_date])
+
+        for a in account_group.accounts
+            push!(names, Symbol(a.name))
+            push!(values, a.value)
+        end
+
+        trajectories = DataFrame(; zip(names, values)...)
+
+        new(name, account_group, 0, start_date, trajectories)
+    end
 end
 
 Base.show(io::IO, bt::BlingTrajectory) = show(io, bt.name)
@@ -92,6 +109,7 @@ function current_value(account_group::AccountGroup)
     return sum([a.value for a in account_group.accounts])
 end
 
+
 """
     current_value(traj)
 
@@ -104,8 +122,27 @@ Get the value of an BlingTrajectory.
 - total value of all Accounts in a BlingTrajectory
 """
 function current_value(traj::BlingTrajectory)
-    return current_value(traj.accounts)
+    return current_value(traj.account_group)
 end
+
+
+"""
+    simulate(account_group, start_date, stop_date)
+
+Create a BlingTrajectory for an AccountGroup simluated for a period of time.
+
+# Arguments
+- account_group::AccountGroup
+- start_date
+- stop_date
+
+# Returns
+- BlingTrajectory
+"""
+function simulate(account_group::AccountGroup, start_date::Date, stop_date::Date)
+    
+end
+
 
 """
     read_system_file(filename)

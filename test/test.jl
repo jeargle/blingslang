@@ -64,8 +64,8 @@ function test_bling_trajectory()
     bt1 = BlingTrajectory("household", ag1)
     println(bt1)
     println("bt1: $bt1")
-    value = current_value(bt1)
-    println("value: $value")
+    println("value: $(current_value(bt1))")
+    println("trajectories: $(bt1.trajectories)")
 
     println()
 end
