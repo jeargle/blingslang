@@ -10,7 +10,9 @@
 #   julia --project=.. -J../boom.so test.jl
 
 
+using Dates
 using Printf
+
 using blingslang
 
 
@@ -70,6 +72,25 @@ function test_bling_trajectory()
     println()
 end
 
+function test_simulate()
+    print_test_header("simulate")
+
+    a1 = Account("bank", 1000.00, 0.02)
+    a2 = Account("house", 250000.00)
+    a3 = Account("retirement", 60000.00, 0.08)
+    ag1 = AccountGroup("net_worth", [a1, a2, a3])
+
+    bt1 = BlingTrajectory("household", ag1)
+
+    simulate(bt1, Dates.today() + Year(1))
+    println("trajectories: $(bt1.trajectories)")
+    println("initial value: $(initial_value(bt1))")
+    println("current value: $(current_value(bt1))")
+    println("     increase: $(current_value(bt1) - initial_value(bt1))")
+
+    println()
+end
+
 function test_read_system_file()
     print_test_header("read_system_file()")
 
@@ -86,6 +107,7 @@ function main()
     test_account()
     test_account_group()
     test_bling_trajectory()
+    test_simulate()
     test_read_system_file()
 end
 

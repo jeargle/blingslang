@@ -14,7 +14,7 @@ using YAML
 
 
 export Account, AccountGroup, BlingTrajectory
-export value_at_time, current_value, simulate, read_system_file
+export value_at_time, current_value, initial_value, simulate, read_system_file
 
 
 """
@@ -111,36 +111,81 @@ end
 
 
 """
-    current_value(traj)
+    initial_value(traj)
 
-Get the value of an BlingTrajectory.
+Get the initial value of an BlingTrajectory.
 
 # Arguments
 - traj::BlingTrajectory
 
 # Returns
-- total value of all Accounts in a BlingTrajectory
+- total initial value of all Accounts in a BlingTrajectory
 """
-function current_value(traj::BlingTrajectory)
+function initial_value(traj::BlingTrajectory)
     return current_value(traj.account_group)
 end
 
 
 """
-    simulate(account_group, start_date, stop_date)
+    current_value(traj)
 
-Create a BlingTrajectory for an AccountGroup simluated for a period of time.
+Get the last value of an BlingTrajectory.
 
 # Arguments
-- account_group::AccountGroup
-- start_date
-- stop_date
+- traj::BlingTrajectory
+
+# Returns
+- total current value of all Accounts in a BlingTrajectory
+"""
+function current_value(traj::BlingTrajectory)
+    current_row = last(traj.trajectories)
+    values = [current_row[Symbol(a.name)]
+              for a in traj.account_group.accounts]
+    return sum(values)
+end
+
+
+"""
+    get_next_value(account, previous_value)
+
+Get the value of an account at the next timestep.
+
+# Arguments
+- account::Account
+- previous_value
+
+# Returns
+- next value
+"""
+function get_next_value(account::Account, previous_value)
+    time = 1.0/365.0
+    return previous_value * (1.0 + account.growth_rate)^time
+end
+
+
+"""
+    simulate(traj, stop_date)
+
+Simulate a BlingTrajectory for a period of time.
+
+# Arguments
+- traj::BlingTrajectory
+- stop_date::Date
 
 # Returns
 - BlingTrajectory
 """
-function simulate(account_group::AccountGroup, start_date::Date, stop_date::Date)
-    
+function simulate(traj::BlingTrajectory, stop_date::Date)
+    for timestep in range(traj.start_date+Day(1), stop_date)
+        next_values = Vector{Any}([timestep])
+        previous_values = last(traj.trajectories)
+        for a in traj.account_group.accounts
+            previous_value = previous_values[Symbol(a.name)]
+            next_value = get_next_value(a, previous_value)
+            push!(next_values, next_value)
+        end
+        push!(traj.trajectories, next_values)
+    end
 end
 
 
