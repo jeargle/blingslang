@@ -14,7 +14,8 @@ using YAML
 
 
 export Account, AccountGroup, BlingTrajectory
-export value_at_time, current_value, initial_value, simulate, read_system_file
+export value_at_time, current_value, initial_value, simulate
+export plot_trajectories, read_system_file
 
 
 """
@@ -237,5 +238,66 @@ function read_system_file(filename)
 
     return account_groups
 end
+
+
+"""
+    plot_trajectories(traj, account_names)
+
+Create a plot of Account values over time.
+
+# Arguments
+- traj::BlingTrajectory
+- account_names
+
+# Returns
+- plot object
+"""
+function plot_trajectories(traj::BlingTrajectory, account_names)
+    x = traj.trajectories.date
+    ys = [traj.trajectories[!, Symbol(an)] for an in account_names]
+    p = plot(x, ys)
+
+    return p
+end
+
+
+"""
+    plot_trajectories(traj)
+
+Create a plot of Account values over time.
+
+# Arguments
+- traj::BlingTrajectory
+
+# Returns
+- plot object
+"""
+function plot_trajectories(traj::BlingTrajectory)
+    account_names = [a.name for a in traj.account_group.accounts]
+    p = plot_trajectories(traj, account_names)
+
+    return p
+end
+
+
+"""
+    plot_trajectory(traj)
+
+Create a plot of AccountGroup value over time.
+
+# Arguments
+- traj::BlingTrajectory
+
+# Returns
+- plot object
+"""
+function plot_trajectory(traj::BlingTrajectory)
+    x = traj.trajectories.date
+    ys = [traj.trajectories[!, Symbol(an)] for an in account_names]
+    p = plot(x, ys)
+
+    return p
+end
+
 
 end
