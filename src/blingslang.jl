@@ -263,7 +263,8 @@ Create a plot of Account values over time.
 function plot_trajectories(traj::BlingTrajectory, account_names)
     x = traj.trajectories.date
     ys = [traj.trajectories[!, Symbol(an)] for an in account_names]
-    p = plot(x, ys)
+
+    p = plot(x, ys, label=permutedims(account_names), title="Balance over time", xlabel="Date", ylabel="Balance")
 
     return p
 end
