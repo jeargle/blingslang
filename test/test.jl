@@ -113,6 +113,10 @@ function test_plot_trajectories()
     savefig(p, "retirement_value.svg")
     println("retirement value plotted")
 
+    p = plot_trajectories(bt1, [:total])
+    savefig(p, "total_value.svg")
+    println("total value plotted")
+
     println()
 end
 

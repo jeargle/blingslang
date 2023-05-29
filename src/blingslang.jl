@@ -59,6 +59,7 @@ struct BlingTrajectory
     # event_counters
 
     function BlingTrajectory(name::AbstractString, account_group::AccountGroup)
+        # Column for date.
         names = [:date]
         start_date = Dates.today()
         values = Vector{Any}([start_date])
@@ -67,6 +68,10 @@ struct BlingTrajectory
             push!(names, Symbol(a.name))
             push!(values, a.value)
         end
+
+        # Column for AccountGroup totals.
+        push!(names, :total)
+        push!(values, current_value(account_group))
 
         trajectories = DataFrame(; zip(names, values)...)
 
@@ -180,11 +185,14 @@ function simulate(traj::BlingTrajectory, stop_date::Date)
     for timestep in range(traj.start_date+Day(1), stop_date)
         next_values = Vector{Any}([timestep])
         previous_values = last(traj.trajectories)
+        total = 0.0
         for a in traj.account_group.accounts
             previous_value = previous_values[Symbol(a.name)]
             next_value = get_next_value(a, previous_value)
             push!(next_values, next_value)
+            total += next_value
         end
+        push!(next_values, total)
         push!(traj.trajectories, next_values)
     end
 end
