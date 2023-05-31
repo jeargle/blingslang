@@ -17,6 +17,7 @@ Simulations are set up through simple, YAML-based config files.  This makes it e
 Dependencies
 ------------
 
+* ArgParse
 * DataFrames
 * Plots
 * Printf
