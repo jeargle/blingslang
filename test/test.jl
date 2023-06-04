@@ -25,6 +25,32 @@ function print_test_header(test_name)
     println(border)
 end
 
+function test_account_update()
+    print_test_header("AccountUpdate")
+
+    au1 = AccountUpdate(100.0, "once", "2020-04-01")
+    println(au1)
+    println("au1: $au1")
+
+    au2 = AccountUpdate(1500.0, "weekly", "Thursday")
+    println(au2)
+    println("au2: $au2")
+
+    au3 = AccountUpdate(-2500.0, "monthly", "3")
+    println(au3)
+    println("au3: $au3")
+
+    au4 = AccountUpdate(-2500.0, "yearly", "3")
+    println(au4)
+    println("au4: $au4")
+
+    au5 = AccountUpdate(-5.0, "daily")
+    println(au5)
+    println("au5: $au5")
+
+    println()
+end
+
 function test_account()
     print_test_header("Account")
 
@@ -131,14 +157,36 @@ function test_read_system_file()
     println()
 end
 
+function test_read_file_and_simulate()
+    print_test_header("Read File and Simulate")
+
+    system = read_system_file("./systems/system1.yml")
+    ag1 = system[1]
+    bt1 = BlingTrajectory("net worth", ag1)
+
+    simulate(bt1, Dates.today() + Year(20))
+
+    p = plot_trajectories(bt1)
+    savefig(p, "all_values.svg")
+    println("all values plotted")
+
+    p = plot_trajectories(bt1, ["total"])
+    savefig(p, "total_value.svg")
+    println("total value plotted")
+
+    println()
+end
+
 
 function main()
+    test_account_update()
     test_account()
     test_account_group()
     test_bling_trajectory()
     test_simulate()
     test_plot_trajectories()
     test_read_system_file()
+    # test_read_file_and_simulate()
 end
 
 main()

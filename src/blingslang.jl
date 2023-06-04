@@ -13,9 +13,33 @@ using Random
 using YAML
 
 
-export Account, AccountGroup, BlingTrajectory
+export AccountUpdate, Account, AccountGroup, BlingTrajectory
 export value_at_time, current_value, initial_value, simulate
 export plot_trajectories, read_system_file
+
+
+"""
+Model for changing the value of an Account on certain days.
+"""
+struct AccountUpdate
+    value_change::Float64
+    recurrence::AbstractString  # once, daily, weekly, monthly
+    day::AbstractString  # specific recurrence day
+    # next_date::Date  # used during simulation
+
+    AccountUpdate(value_change::Float64, recurrence::AbstractString, day::AbstractString) = new(value_change, recurrence, day)
+
+    function AccountUpdate(value_change::Float64, recurrence::AbstractString)
+        if recurrence != "daily"
+            throw(ArgumentError("Must provide \"day\" argument if recurrence is not \"daily\"."))
+        end
+        new(value_change, recurrence, "")
+    end
+
+end
+
+Base.show(io::IO, update::AccountUpdate) = show(io, string(update.value_change, ", ", update.recurrence, ", ", update.day))
+Base.show(io::IO, m::MIME"text/plain", update::AccountUpdate) = show(io, m, string(update.value_change, ", ", update.recurrence, ", ", update.day))
 
 
 """
@@ -45,6 +69,7 @@ end
 
 Base.show(io::IO, ag::AccountGroup) = show(io, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 Base.show(io::IO, m::MIME"text/plain", account::AccountGroup) = show(io, m, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
+
 
 
 """
@@ -217,7 +242,7 @@ function read_system_file(filename)
 
     if haskey(setup, "accounts")
         for account_info in setup["accounts"]
-            name = string(account_info["name"][1])
+            name = string(account_info["name"])
             value = account_info["value"]
             if haskey(account_info, "growth_rate")
                 growth_rate = account_info["growth_rate"]
@@ -228,6 +253,8 @@ function read_system_file(filename)
             accounts[name] = account
         end
     end
+
+    # println(accounts)
 
     # build AccountGroups
     account_groups = Array{AccountGroup, 1}()
