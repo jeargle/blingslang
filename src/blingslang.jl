@@ -49,9 +49,12 @@ struct Account
     name::AbstractString
     value::Float64
     growth_rate::Float64  # annual
+    updates::Array{AccountUpdate, 1}
 
-    Account(name::AbstractString, value::Float64) = new(name, value, 0.0)
-    Account(name::AbstractString, value::Float64, growth_rate::Float64) = new(name, value, growth_rate)
+    Account(name::AbstractString, value::Float64) = new(name, value, 0.0, [])
+    Account(name::AbstractString, value::Float64, growth_rate::Float64) = new(name, value, growth_rate, [])
+    Account(name::AbstractString, value::Float64, updates::Array{AccountUpdate, 1}) = new(name, value, 0.0, updates)
+    Account(name::AbstractString, value::Float64, growth_rate::Float64, updates::Array{AccountUpdate, 1}) = new(name, value, growth_rate, updates)
 end
 
 Base.show(io::IO, account::Account) = show(io, string(account.name, ": ", account.value))

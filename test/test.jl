@@ -57,6 +57,7 @@ function test_account()
     a1 = Account("bank", 1000.00)
     println(a1)
     println("a1: $a1")
+
     a2 = Account("investments", 500.00, 0.08)
     println(a2)
     println("a2: $a2")
@@ -66,6 +67,19 @@ function test_account()
         curr_val = value_at_time(a2, t/52.0)
         @printf "  %4d | %7.2f\n" t curr_val
     end
+
+    au1 = AccountUpdate(100.0, "once", "2020-04-01")
+    println(au1)
+    println("au1: $au1")
+
+    au2 = AccountUpdate(1500.0, "weekly", "Thursday")
+    println(au2)
+    println("au2: $au2")
+
+    a3 = Account("investments", 500.00, [au1, au2])
+    println(a3)
+    println("a3: $a3")
+    println("a3.updates: $(a3.updates)")
 
     println()
 end
@@ -186,7 +200,7 @@ function main()
     test_simulate()
     test_plot_trajectories()
     test_read_system_file()
-    # test_read_file_and_simulate()
+    test_read_file_and_simulate()
 end
 
 main()
