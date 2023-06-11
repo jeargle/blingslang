@@ -33,20 +33,22 @@ function test_account_update()
     println("au1: $au1")
 
     au2 = AccountUpdate(1500.0, "weekly", "Thursday")
-    println(au2)
     println("au2: $au2")
 
     au3 = AccountUpdate(-2500.0, "monthly", "3")
-    println(au3)
     println("au3: $au3")
 
     au4 = AccountUpdate(-2500.0, "yearly", "3")
-    println(au4)
     println("au4: $au4")
 
     au5 = AccountUpdate(-5.0, "daily")
-    println(au5)
     println("au5: $au5")
+
+    au6 = AccountUpdate(-2500.0, "monthly", 3)
+    println("au6: $au6")
+
+    au7 = AccountUpdate(-2500.0, "yearly", 3)
+    println("au7: $au7")
 
     println()
 end
@@ -59,7 +61,6 @@ function test_account()
     println("a1: $a1")
 
     a2 = Account("investments", 500.00, 0.08)
-    println(a2)
     println("a2: $a2")
 
     println("  week | value")
@@ -69,15 +70,15 @@ function test_account()
     end
 
     au1 = AccountUpdate(100.0, "once", "2020-04-01")
-    println(au1)
     println("au1: $au1")
 
     au2 = AccountUpdate(1500.0, "weekly", "Thursday")
-    println(au2)
     println("au2: $au2")
 
-    a3 = Account("investments", 500.00, [au1, au2])
-    println(a3)
+    au3 = AccountUpdate(-2500.0, "monthly", 3)
+    println("au3: $au3")
+
+    a3 = Account("investments", 500.00, [au1, au2, au3])
     println("a3: $a3")
     println("a3.updates: $(a3.updates)")
 

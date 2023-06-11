@@ -24,16 +24,32 @@ Model for changing the value of an Account on certain days.
 struct AccountUpdate
     value_change::Float64
     recurrence::AbstractString  # once, daily, weekly, monthly
-    day::AbstractString  # specific recurrence day
-    # next_date::Date  # used during simulation
+    day::Int64  # specific recurrence day; 0 if recurrence is once or daily
+    next_date::Union{Date, Nothing}  # used during simulation; initialized if recurrence is once
 
-    AccountUpdate(value_change::Float64, recurrence::AbstractString, day::AbstractString) = new(value_change, recurrence, day)
+    function AccountUpdate(value_change::Float64, recurrence::AbstractString, day_str::AbstractString)
+        day = tryparse(Int64, day_str)
+        next_date = nothing
+        if day != nothing
+            return AccountUpdate(value_change, recurrence, day)
+        elseif recurrence == "once"
+            day = 0
+            next_date = Date(day_str)
+        else
+            day = getfield(Dates, Symbol(day_str))
+        end
+        new(value_change, recurrence, day, next_date)
+    end
+
+    function AccountUpdate(value_change::Float64, recurrence::AbstractString, day::Int64)
+        new(value_change, recurrence, day, nothing)
+    end
 
     function AccountUpdate(value_change::Float64, recurrence::AbstractString)
         if recurrence != "daily"
             throw(ArgumentError("Must provide \"day\" argument if recurrence is not \"daily\"."))
         end
-        new(value_change, recurrence, "")
+        new(value_change, recurrence, 0, nothing)
     end
 
 end
@@ -180,20 +196,88 @@ end
 
 
 """
-    get_next_value(account, previous_value)
+    init_next_date(update, date)
+
+Set the initial value for next date that an AccountUpdate should be applied.
+
+# Arguments
+- update::AccountUpdate
+- date::Date
+"""
+function init_next_date(update::AccountUpdate, date::Date)
+    # "once" does not need to be handled
+    if update.recurrence == "daily"
+        update.next_date = date + Day(1)
+    elseif update.recurrence == "weekly"
+        weekday = str_to_day[update.day]
+        update.next_date = date + Day(7 + dayofweek(date) - weekday)
+    elseif update.recurrence == "monthly"
+        # handle 29-31 specially
+        monthday = update.day
+        if day(date) <= monthday
+            update.next_date = date + Day(30 + day(date) - monthday)
+        else
+            update.next_date = date
+        end
+    elseif update.recurrence == "yearly"
+
+    end
+end
+
+
+"""
+    set_next_date(update, date)
+
+Set the next date that an AccountUpdate should be applied.
+
+# Arguments
+- update::AccountUpdate
+- date::Date
+"""
+function set_next_date(update::AccountUpdate, date::Date)
+    # "once" does not need to be handled
+    if update.recurrence == "daily"
+        update.next_date = date + Day(1)
+    elseif update.recurrence == "weekly"
+        update.next_date = date + Week(1)
+    elseif update.recurrence == "monthly"
+        update.next_date = date + Month(1)
+    elseif update.recurrence == "yearly"
+        update.next_date = date + Year(1)
+    end
+end
+
+
+"""
+    get_next_value(date, account, previous_value)
 
 Get the value of an account at the next timestep.
 
 # Arguments
+- date::Date
 - account::Account
 - previous_value
 
 # Returns
 - next value
 """
-function get_next_value(account::Account, previous_value)
-    time = 1.0/365.0
-    return previous_value * (1.0 + account.growth_rate)^time
+function get_next_value(date::Date, account::Account, previous_value)
+    if growth_rate != 0.0
+        time = 1.0/365.0
+        next_value = previous_value * (1.0 + account.growth_rate)^time
+    else
+        next_value = previous_value
+    end
+
+    update_value = 0.0
+    for update in account.updates
+        if update.next_date == date
+            update_value += update.value_change
+            set_next_date(update, date)
+        end
+    end
+
+    return next_value
 end
 
 
@@ -216,7 +300,7 @@ function simulate(traj::BlingTrajectory, stop_date::Date)
         total = 0.0
         for a in traj.account_group.accounts
             previous_value = previous_values[Symbol(a.name)]
-            next_value = get_next_value(a, previous_value)
+            next_value = get_next_value(timestep, a, previous_value)
             push!(next_values, next_value)
             total += next_value
         end
