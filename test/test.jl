@@ -56,7 +56,7 @@ end
 function test_account()
     print_test_header("Account")
 
-    a1 = Account("bank", 1000.00)
+    a1 = Account("bank", 5000.00)
     println(a1)
     println("a1: $a1")
 
@@ -88,7 +88,7 @@ end
 function test_account_group()
     print_test_header("AccountGroup")
 
-    a1 = Account("bank", 1000.00)
+    a1 = Account("bank", 5000.00)
     a2 = Account("house", 250000.00)
     a3 = Account("retirement", 60000.00)
     ag1 = AccountGroup("net_worth", [a1, a2, a3])
@@ -101,7 +101,9 @@ end
 function test_bling_trajectory()
     print_test_header("BlingTrajectory")
 
-    a1 = Account("bank", 1000.00)
+    au1 = AccountUpdate(1200.0, "weekly", "Friday")
+    au2 = AccountUpdate(-2600.0, "monthly", 3)
+    a1 = Account("bank", 5000.00, [au1, au2])
     a2 = Account("house", 250000.00)
     a3 = Account("retirement", 60000.00)
     ag1 = AccountGroup("net_worth", [a1, a2, a3])
@@ -118,7 +120,9 @@ end
 function test_simulate()
     print_test_header("simulate()")
 
-    a1 = Account("bank", 1000.00, 0.02)
+    au1 = AccountUpdate(1200.0, "weekly", "Friday")
+    au2 = AccountUpdate(-2600.0, "monthly", 3)
+    a1 = Account("bank", 5000.00, [au1, au2])
     a2 = Account("house", 250000.00)
     a3 = Account("retirement", 60000.00, 0.08)
     ag1 = AccountGroup("net_worth", [a1, a2, a3])
@@ -137,9 +141,11 @@ end
 function test_plot_trajectories()
     print_test_header("plot_trajectories()")
 
-    a1 = Account("bank", 1000.00, 0.02)
+    au1 = AccountUpdate(1200.0, "weekly", "Friday")
+    au2 = AccountUpdate(-2600.0, "monthly", 3)
+    a1 = Account("bank", 5000.00, [au1, au2])
     a2 = Account("house", 250000.00)
-    a3 = Account("retirement", 60000.00, 0.08)
+    a3 = Account("retirement", 140000.00, 0.08)
     ag1 = AccountGroup("net_worth", [a1, a2, a3])
 
     bt1 = BlingTrajectory("household", ag1)
@@ -149,6 +155,10 @@ function test_plot_trajectories()
     p = plot_trajectories(bt1)
     savefig(p, "all_values.svg")
     println("all values plotted")
+
+    p = plot_trajectories(bt1, [a1.name])
+    savefig(p, "bank_value.svg")
+    println("bank value plotted")
 
     p = plot_trajectories(bt1, [a3.name])
     savefig(p, "retirement_value.svg")

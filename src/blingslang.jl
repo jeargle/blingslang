@@ -21,7 +21,7 @@ export plot_trajectories, read_system_file
 """
 Model for changing the value of an Account on certain days.
 """
-struct AccountUpdate
+mutable struct AccountUpdate
     value_change::Float64
     recurrence::AbstractString  # once, daily, weekly, monthly
     day::Int64  # specific recurrence day; 0 if recurrence is once or daily
@@ -209,18 +209,40 @@ function init_next_date(update::AccountUpdate, date::Date)
     if update.recurrence == "daily"
         update.next_date = date + Day(1)
     elseif update.recurrence == "weekly"
-        weekday = str_to_day[update.day]
-        update.next_date = date + Day(7 + dayofweek(date) - weekday)
+        weekday = update.day
+        if dayofweek(date) <= weekday
+            update.next_date = date + Day(weekday - dayofweek(date))
+        else
+            update.next_date = date + Day(7 + weekday - dayofweek(date))
+        end
     elseif update.recurrence == "monthly"
         # handle 29-31 specially
         monthday = update.day
         if day(date) <= monthday
-            update.next_date = date + Day(30 + day(date) - monthday)
+            update.next_date = date + Day(monthday - day(date))
         else
-            update.next_date = date
+            update.next_date = date + Day(30 + monthday - day(date))
         end
     elseif update.recurrence == "yearly"
 
+    end
+end
+
+
+"""
+    init_next_date(account_group, date)
+
+Set the initial value for next date of all AccountUpdates within an AccountGroup.
+
+# Arguments
+- account_group::AccountGroup
+- date::Date
+"""
+function init_next_date(account_group::AccountGroup, date::Date)
+    for account in account_group.accounts
+        for update in account.updates
+            init_next_date(update, date)
+        end
     end
 end
 
@@ -240,7 +262,10 @@ function set_next_date(update::AccountUpdate, date::Date)
         update.next_date = date + Day(1)
     elseif update.recurrence == "weekly"
         update.next_date = date + Week(1)
+    elseif update.recurrence == "biweekly"
+        update.next_date = date + Week(2)
     elseif update.recurrence == "monthly"
+        # handle 29-31 specially
         update.next_date = date + Month(1)
     elseif update.recurrence == "yearly"
         update.next_date = date + Year(1)
@@ -262,17 +287,16 @@ Get the value of an account at the next timestep.
 - next value
 """
 function get_next_value(date::Date, account::Account, previous_value)
-    if growth_rate != 0.0
+    if account.growth_rate != 0.0
         time = 1.0/365.0
         next_value = previous_value * (1.0 + account.growth_rate)^time
     else
         next_value = previous_value
     end
 
-    update_value = 0.0
     for update in account.updates
         if update.next_date == date
-            update_value += update.value_change
+            next_value += update.value_change
             set_next_date(update, date)
         end
     end
@@ -294,6 +318,7 @@ Simulate a BlingTrajectory for a period of time.
 - BlingTrajectory
 """
 function simulate(traj::BlingTrajectory, stop_date::Date)
+    init_next_date(traj.account_group, traj.start_date)
     for timestep in range(traj.start_date+Day(1), stop_date)
         next_values = Vector{Any}([timestep])
         previous_values = last(traj.trajectories)
