@@ -1,3 +1,10 @@
+name = "blingslang"
+uuid = "221bd1b5-8a32-4f8e-b5bd-00d7b84e54bd"
+keywords = ["personal finance", "simulator"]
+license = "MIT"
+desc = "Personal finance simulator"
+version = "0.0.1"
+
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"

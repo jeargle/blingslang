@@ -1,7 +1,7 @@
 blingslang
 ==========
 
-simple money calculation tools
+Personal finance simulator
 
 
 General
