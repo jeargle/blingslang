@@ -343,7 +343,7 @@ Create a simulation system from a YAML setup file.
 - filename: name of YAML setup file
 
 # Returns
-- SYSTEMSIMULATION
+- Dict with "accounts", "account_groups", and "trajectories"
 """
 function read_system_file(filename)
     setup = YAML.load(open(filename))
@@ -357,11 +357,27 @@ function read_system_file(filename)
         for account_info in setup["accounts"]
             name = string(account_info["name"])
             value = account_info["value"]
+
+            account_updates = Array{AccountUpdate, 1}()
+            if haskey(account_info, "updates")
+                for update_info in account_info["updates"]
+                    value_change = float(update_info["value_change"])
+                    recurrence = string(update_info["recurrence"])
+                    if haskey(update_info, "day")
+                        day = update_info["day"]
+                        update = AccountUpdate(value_change, recurrence, day)
+                    else
+                        update = AccountUpdate(value_change, recurrence)
+                    end
+                    push!(account_updates, update)
+                end
+            end
+
             if haskey(account_info, "growth_rate")
                 growth_rate = account_info["growth_rate"]
-                account = Account(name, value, growth_rate)
+                account = Account(name, value, growth_rate, account_updates)
             else
-                account = Account(name, value)
+                account = Account(name, value, account_updates)
             end
             accounts[name] = account
         end

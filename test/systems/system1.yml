@@ -1,8 +1,15 @@
 accounts:
   - name: A
-    value: 1000.0
+    value: 10000.0
+    updates:
+      - value_change: 1200
+        recurrence: weekly
+        day: Friday
+      - value_change: -2600
+        recurrence: monthly
+        day: 3
   - name: B
-    value: 5000.0
+    value: 50000.0
     growth_rate: 0.08
   - name: C
     value: 10000.0
@@ -25,7 +32,7 @@ account_groups:
 trajectories:
   - name: net worth
     account_group: Group1
-    stop_date: 2043-08-05
+    stop_date: 2028-08-05
   - name: company
     account_group: Group2
     stop_date: 2043-08-05
