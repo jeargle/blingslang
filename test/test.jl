@@ -107,7 +107,7 @@ function test_bling_trajectory()
     a3 = Account("retirement", 60000.00)
     ag1 = AccountGroup("net_worth", [a1, a2, a3])
 
-    bt1 = BlingTrajectory("household", ag1)
+    bt1 = BlingTrajectory("household", ag1, Dates.today() + Year(1))
     println(bt1)
     println("bt1: $bt1")
     println("value: $(current_value(bt1))")
@@ -126,9 +126,9 @@ function test_simulate()
     a3 = Account("retirement", 60000.00, 0.08)
     ag1 = AccountGroup("net_worth", [a1, a2, a3])
 
-    bt1 = BlingTrajectory("household", ag1)
+    bt1 = BlingTrajectory("household", ag1, Dates.today() + Year(1))
 
-    simulate(bt1, Dates.today() + Year(1))
+    simulate(bt1)
     println("trajectories: $(bt1.trajectories)")
     println("initial value: $(initial_value(bt1))")
     println("current value: $(current_value(bt1))")
@@ -147,9 +147,9 @@ function test_plot_trajectories()
     a3 = Account("retirement", 140000.00, 0.08)
     ag1 = AccountGroup("net_worth", [a1, a2, a3])
 
-    bt1 = BlingTrajectory("household", ag1)
+    bt1 = BlingTrajectory("household", ag1, Dates.today() + Year(30))
 
-    simulate(bt1, Dates.today() + Year(30))
+    simulate(bt1)
 
     p = plot_trajectories(bt1)
     savefig(p, "all_values.svg")
@@ -187,7 +187,7 @@ function test_read_file_and_simulate()
     system = read_system_file("./systems/system1.yml")
     bt1 = system["trajectories"]["net worth"]
 
-    simulate(bt1, Dates.today() + Year(20))
+    simulate(bt1)
 
     p = plot_trajectories(bt1)
     savefig(p, "all_values.svg")

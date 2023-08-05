@@ -98,13 +98,14 @@ struct BlingTrajectory
     account_group::AccountGroup
     step_count::Int
     start_date::Date
+    stop_date::Date
     trajectories::DataFrame
     # event_counters
 
-    function BlingTrajectory(name::AbstractString, account_group::AccountGroup)
+    function BlingTrajectory(name::AbstractString, account_group::AccountGroup, stop_date::Date; start_date::Date=Dates.today())
         # Column for date.
         names = [:date]
-        start_date = Dates.today()
+        # start_date = Dates.today()
         values = Vector{Any}([start_date])
 
         for a in account_group.accounts
@@ -118,7 +119,7 @@ struct BlingTrajectory
 
         trajectories = DataFrame(; zip(names, values)...)
 
-        new(name, account_group, 0, start_date, trajectories)
+        new(name, account_group, 0, start_date, stop_date, trajectories)
     end
 end
 
@@ -305,20 +306,19 @@ end
 
 
 """
-    simulate(traj, stop_date)
+    simulate(traj)
 
 Simulate a BlingTrajectory for a period of time.
 
 # Arguments
 - traj::BlingTrajectory
-- stop_date::Date
 
 # Returns
 - BlingTrajectory
 """
-function simulate(traj::BlingTrajectory, stop_date::Date)
+function simulate(traj::BlingTrajectory)
     init_next_date(traj.account_group, traj.start_date)
-    for timestep in range(traj.start_date+Day(1), stop_date)
+    for timestep in range(traj.start_date+Day(1), traj.stop_date)
         next_values = Vector{Any}([timestep])
         previous_values = last(traj.trajectories)
         total = 0.0
@@ -398,7 +398,12 @@ function read_system_file(filename)
             name = string(trajectory_info["name"])
             # Must have an AccountGroup
             account_group = account_groups[string(trajectory_info["account_group"])]
-            trajectory = BlingTrajectory(name, account_group)
+            if haskey(trajectory_info, "stop_date")
+                stop_date = Date(string(trajectory_info["stop_date"]))
+            else
+                stop_date = Dates.today() + Year(20)
+            end
+            trajectory = BlingTrajectory(name, account_group, stop_date)
             trajectories[name] = trajectory
         end
     end

@@ -25,5 +25,7 @@ account_groups:
 trajectories:
   - name: net worth
     account_group: Group1
+    stop_date: 2043-08-05
   - name: company
     account_group: Group2
+    stop_date: 2043-08-05
