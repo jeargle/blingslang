@@ -1,5 +1,4 @@
 # John Eargle (mailto: jeargle at gmail.com)
-# 2023
 # blingslang
 
 module blingslang
@@ -349,7 +348,9 @@ Create a simulation system from a YAML setup file.
 function read_system_file(filename)
     setup = YAML.load(open(filename))
 
-    # build Accounts
+    system = Dict()
+
+    # Build Accounts.
     accounts = Dict()
 
     if haskey(setup, "accounts")
@@ -368,8 +369,10 @@ function read_system_file(filename)
 
     # println(accounts)
 
-    # build AccountGroups
-    account_groups = Array{AccountGroup, 1}()
+    system["accounts"] = accounts
+
+    # Build AccountGroups.
+    account_groups = Dict()
 
     if haskey(setup, "account_groups")
         for account_group_info in setup["account_groups"]
@@ -379,11 +382,30 @@ function read_system_file(filename)
             end
             name = string(account_group_info["name"])
             account_group = AccountGroup(name, group_accounts)
-            push!(account_groups, account_group)
+            # push!(account_groups, account_group)
+            account_groups[name] = account_group
         end
     end
 
-    return account_groups
+    system["account_groups"] = account_groups
+
+    trajectories = Dict()
+
+    # Build BlingTrajectory.
+    if haskey(setup, "trajectories")
+        for trajectory_info in setup["trajectories"]
+            # Must have a name
+            name = string(trajectory_info["name"])
+            # Must have an AccountGroup
+            account_group = account_groups[string(trajectory_info["account_group"])]
+            trajectory = BlingTrajectory(name, account_group)
+            trajectories[name] = trajectory
+        end
+    end
+
+    system["trajectories"] = trajectories
+
+    return system
 end
 
 

@@ -1,5 +1,4 @@
 # John Eargle (mailto: jeargle at gmail.com)
-# 2023
 # test
 #
 # To build sysimage boom.so from blingslang/test:
@@ -175,7 +174,7 @@ function test_read_system_file()
     print_test_header("read_system_file()")
 
     system = read_system_file("./systems/system1.yml")
-    for ag in system
+    for ag in system["account_groups"]
         println(ag)
     end
 
@@ -186,8 +185,7 @@ function test_read_file_and_simulate()
     print_test_header("Read File and Simulate")
 
     system = read_system_file("./systems/system1.yml")
-    ag1 = system[1]
-    bt1 = BlingTrajectory("net worth", ag1)
+    bt1 = system["trajectories"]["net worth"]
 
     simulate(bt1, Dates.today() + Year(20))
 

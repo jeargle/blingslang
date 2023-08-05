@@ -21,3 +21,9 @@ account_groups:
     - B
     - C
     name: Group3
+
+trajectories:
+  - name: net worth
+    account_group: Group1
+  - name: company
+    account_group: Group2
