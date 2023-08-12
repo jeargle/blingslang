@@ -36,10 +36,10 @@ Here is an example setup file:
         growth_rate: 0.08
 
     account_groups:
-      - accounts:
+      - name: Group1
+        accounts:
         - A
         - B
-        name: Group1
 
     trajectories:
       - name: net worth
