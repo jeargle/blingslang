@@ -6,6 +6,7 @@ module blingslang
 using Dates
 
 using DataFrames
+using DataStructures
 using Plots
 using Printf
 using Random
@@ -17,6 +18,9 @@ export value_at_time, current_value, initial_value, simulate
 export plot_trajectories, read_system_file
 
 
+# Hack to avoid disallowed mutual type references.
+abstract type AbstractAccount end
+
 """
 Model for changing the value of an Account on certain days.
 """
@@ -25,30 +29,31 @@ mutable struct AccountUpdate
     recurrence::AbstractString  # once, daily, weekly, monthly
     day::Int64  # specific recurrence day; 0 if recurrence is once or daily
     next_date::Union{Date, Nothing}  # used during simulation; initialized if recurrence is once
+    target_account::Union{AbstractAccount, Nothing}
 
-    function AccountUpdate(value_change::Float64, recurrence::AbstractString, day_str::AbstractString)
+    function AccountUpdate(value_change::Float64, recurrence::AbstractString, day_str::AbstractString; target_account=nothing)
         day = tryparse(Int64, day_str)
         next_date = nothing
         if day != nothing
-            return AccountUpdate(value_change, recurrence, day)
+            return AccountUpdate(value_change, recurrence, day; target_account=target_account)
         elseif recurrence == "once"
             day = 0
             next_date = Date(day_str)
         else
             day = getfield(Dates, Symbol(day_str))
         end
-        new(value_change, recurrence, day, next_date)
+        new(value_change, recurrence, day, next_date, target_account)
     end
 
-    function AccountUpdate(value_change::Float64, recurrence::AbstractString, day::Int64)
-        new(value_change, recurrence, day, nothing)
+    function AccountUpdate(value_change::Float64, recurrence::AbstractString, day::Int64; target_account=nothing)
+        new(value_change, recurrence, day, nothing, target_account)
     end
 
-    function AccountUpdate(value_change::Float64, recurrence::AbstractString)
+    function AccountUpdate(value_change::Float64, recurrence::AbstractString; target_account=nothing)
         if recurrence != "daily"
             throw(ArgumentError("Must provide \"day\" argument if recurrence is not \"daily\"."))
         end
-        new(value_change, recurrence, 0, nothing)
+        new(value_change, recurrence, 0, nothing, target_account)
     end
 
 end
@@ -60,7 +65,7 @@ Base.show(io::IO, m::MIME"text/plain", update::AccountUpdate) = show(io, m, stri
 """
 Account model.
 """
-struct Account
+struct Account <: AbstractAccount
     name::AbstractString
     value::Float64
     growth_rate::Float64  # annual
@@ -294,14 +299,19 @@ function get_next_value(date::Date, account::Account, previous_value)
         next_value = previous_value
     end
 
+    next_transfers = DefaultDict{Account, Float64}(0.0)
+
     for update in account.updates
         if update.next_date == date
             next_value += update.value_change
+            if update.target_account != nothing
+                next_transfers[update.target_account] += update
+            end
             set_next_date(update, date)
         end
     end
 
-    return next_value
+    return next_value, next_transfers
 end
 
 
@@ -318,16 +328,30 @@ Simulate a BlingTrajectory for a period of time.
 """
 function simulate(traj::BlingTrajectory)
     init_next_date(traj.account_group, traj.start_date)
+    # Skip first index which is for timestep.
+    account_to_index = Dict(a => i+1 for (i, a) in enumerate(traj.account_group.accounts))
+
     for timestep in range(traj.start_date+Day(1), traj.stop_date)
         next_values = Vector{Any}([timestep])
         previous_values = last(traj.trajectories)
+        account_transfers = Dict{Account, Float64}()
         total = 0.0
+
         for a in traj.account_group.accounts
             previous_value = previous_values[Symbol(a.name)]
-            next_value = get_next_value(timestep, a, previous_value)
+            next_value, next_transfers = get_next_value(timestep, a, previous_value)
             push!(next_values, next_value)
+            for (target, transfer_val) in next_transfers
+                account_transfers[target] += transfer_val
+            end
             total += next_value
         end
+
+        for (target, transfer_val) in account_transfers
+            next_values[account_to_index[target]] += transfer_val
+            total += transfer_val
+        end
+
         push!(next_values, total)
         push!(traj.trajectories, next_values)
     end
