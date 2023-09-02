@@ -56,6 +56,7 @@ Dependencies
 
 * ArgParse
 * DataFrames
+* DataStructures
 * Plots
 * Printf
 * Random
