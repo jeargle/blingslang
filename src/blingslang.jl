@@ -305,7 +305,7 @@ function get_next_value(date::Date, account::Account, previous_value)
         if update.next_date == date
             next_value += update.value_change
             if update.target_account != nothing
-                next_transfers[update.target_account] += update
+                next_transfers[update.target_account] -= update.value_change
             end
             set_next_date(update, date)
         end
@@ -334,7 +334,7 @@ function simulate(traj::BlingTrajectory)
     for timestep in range(traj.start_date+Day(1), traj.stop_date)
         next_values = Vector{Any}([timestep])
         previous_values = last(traj.trajectories)
-        account_transfers = Dict{Account, Float64}()
+        account_transfers = DefaultDict{Account, Float64}(0.0)
         total = 0.0
 
         for a in traj.account_group.accounts
@@ -347,6 +347,7 @@ function simulate(traj::BlingTrajectory)
             total += next_value
         end
 
+        # Adjust values with Account transfers.
         for (target, transfer_val) in account_transfers
             next_values[account_to_index[target]] += transfer_val
             total += transfer_val
@@ -376,6 +377,7 @@ function read_system_file(filename)
 
     # Build Accounts.
     accounts = Dict()
+    transfer_updates = []
 
     if haskey(setup, "accounts")
         for account_info in setup["accounts"]
@@ -387,13 +389,19 @@ function read_system_file(filename)
                 for update_info in account_info["updates"]
                     value_change = float(update_info["value_change"])
                     recurrence = string(update_info["recurrence"])
+                    update_args = [value_change, recurrence]
+
                     if haskey(update_info, "day")
-                        day = update_info["day"]
-                        update = AccountUpdate(value_change, recurrence, day)
-                    else
-                        update = AccountUpdate(value_change, recurrence)
+                        push!(update_args, update_info["day"])
                     end
-                    push!(account_updates, update)
+
+                    if haskey(update_info, "transfer_to")
+                        push!(transfer_updates, (update_args, update_info["transfer_to"], name))
+                    else
+                        # Create AccountUpdates with no transfers
+                        update = AccountUpdate(update_args...)
+                        push!(account_updates, update)
+                    end
                 end
             end
 
@@ -405,6 +413,17 @@ function read_system_file(filename)
             end
             accounts[name] = account
         end
+
+        # Loop through AccountUpdates with transfers.
+        # These are dependent on existing Accounts so they can only be
+        # added after Accounts are instantiated.
+        for (update_args, target_name, source_name) in transfer_updates
+            target_account = accounts[target_name]
+            update = AccountUpdate(update_args...; target_account=target_account)
+            account = accounts[source_name]
+            push!(account.updates, update)
+        end
+
     end
 
     # println(accounts)

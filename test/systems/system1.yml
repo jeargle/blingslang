@@ -8,11 +8,12 @@ accounts:
       - value_change: -2600
         recurrence: monthly
         day: 3
+        transfer_to: C
   - name: B
     value: 50000.0
     growth_rate: 0.08
   - name: C
-    value: 10000.0
+    value: 100000.0
 
 account_groups:
   - accounts:
@@ -31,7 +32,7 @@ account_groups:
 
 trajectories:
   - name: net worth
-    account_group: Group1
+    account_group: Group3
     stop_date: 2028-08-05
   - name: company
     account_group: Group2
