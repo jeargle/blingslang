@@ -13,7 +13,7 @@ using Random
 using YAML
 
 
-export AccountUpdate, Account, AccountGroup, BlingTrajectory
+export AccountUpdate, Account, AccountGroup, Economy, BlingTrajectory
 export value_at_time, current_value, initial_value, simulate
 export plot_trajectories, read_system_file
 
@@ -22,7 +22,7 @@ export plot_trajectories, read_system_file
 abstract type AbstractAccount end
 
 """
-Model for changing the value of an Account on certain days.
+Model for changing the value of an Account on specified days.
 """
 mutable struct AccountUpdate
     value_change::Float64
@@ -64,6 +64,9 @@ Base.show(io::IO, m::MIME"text/plain", update::AccountUpdate) = show(io, m, stri
 
 """
 Account model.
+
+Holds a value that changes over time depending on growth rate and the actions of
+associated AccountUpdates.
 """
 struct Account <: AbstractAccount
     name::AbstractString
@@ -83,6 +86,8 @@ Base.show(io::IO, m::MIME"text/plain", account::Account) = show(io, m, string(ac
 
 """
 AccountGroup model.
+
+Organizational structure for a set of Accounts.
 """
 struct AccountGroup
     name::AbstractString
@@ -92,6 +97,19 @@ end
 
 Base.show(io::IO, ag::AccountGroup) = show(io, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 Base.show(io::IO, m::MIME"text/plain", account::AccountGroup) = show(io, m, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
+
+
+"""
+Economy model.
+"""
+struct Economy
+    name::AbstractString
+    accounts::Array{Account, 1}
+    AccountGroup(name::AbstractString, accounts::Array{Account, 1}) = new(name, accounts)
+end
+
+Base.show(io::IO, ag::Economy) = show(io, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
+Base.show(io::IO, m::MIME"text/plain", account::Economy) = show(io, m, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 
 
 
