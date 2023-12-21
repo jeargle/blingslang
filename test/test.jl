@@ -5,7 +5,7 @@
 #   using PackageCompiler
 #   create_sysimage([:Plots, :Printf, :Random], sysimage_path="../boom.so", precompile_execution_file="so_builder.jl")
 #
-# To run from uveldt/test:
+# To run from blingslang/test:
 #   julia --project=.. -J../boom.so test.jl
 
 
@@ -186,16 +186,20 @@ function test_read_file_and_simulate()
 
     system = read_system_file("./systems/system1.yml")
     bt1 = system["trajectories"]["net worth"]
-
     simulate(bt1)
 
-    p = plot_trajectories(bt1)
-    savefig(p, "all_values.svg")
-    println("all values plotted")
-
-    p = plot_trajectories(bt1, ["total"])
-    savefig(p, "total_value.svg")
-    println("total value plotted")
+    for plot in system["plots"]
+        file_name = plot["file_name"]
+        traj = system["trajectories"][plot["trajectory"]]
+        account_names = plot["account_names"]
+        if length(account_names) > 0
+            p = plot_trajectories(traj, account_names)
+        else
+            p = plot_trajectories(traj)
+        end
+        savefig(p, file_name)
+        println("$(file_name) plotted")
+    end
 
     println()
 end

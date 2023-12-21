@@ -487,6 +487,24 @@ function read_system_file(filename)
 
     system["trajectories"] = trajectories
 
+    plots = []
+
+    # Assemble plotting info.
+    for plot_info in get(setup, "plots", [])
+        plot = Dict()
+        # Must have a file name
+        plot["file_name"] = string(plot_info["file_name"])
+        # Must have a BlingTrajectory
+        plot["trajectory"] = string(plot_info["trajectory"])
+        plot["account_names"] = []
+        for account_name in get(plot_info, "account_names", [])
+            push!(plot["account_names"], account_name)
+        end
+        push!(plots, plot)
+    end
+
+    system["plots"] = plots
+
     return system
 end
 

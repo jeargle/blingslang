@@ -37,3 +37,11 @@ trajectories:
   - name: company
     account_group: Group2
     stop_date: 2043-08-05
+
+plots:
+  - file_name: all_values.svg
+    trajectory: net worth
+  - file_name: total_value.svg
+    trajectory: net worth
+    account_names:
+      - "total"
