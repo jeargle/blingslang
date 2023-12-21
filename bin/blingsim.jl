@@ -22,18 +22,23 @@ Simulate a system specified by a config file.
 """
 function read_file_and_simulate(filename)
     system = read_system_file(filename)
-    account_group = system[1]
-    bling_traj = BlingTrajectory("net worth", account_group)
 
-    simulate(bling_traj, Dates.today() + Year(20))
+    for (traj_name, traj) in system["trajectories"]
+        simulate(traj)
 
-    p = plot_trajectories(bling_traj)
-    savefig(p, "all_values.svg")
-    println("all values plotted")
-
-    p = plot_trajectories(bling_traj, ["total"])
-    savefig(p, "total_value.svg")
-    println("total value plotted")
+        for plot in system["plots"]
+            file_name = plot["file_name"]
+            traj = system["trajectories"][plot["trajectory"]]
+            account_names = plot["account_names"]
+            if length(account_names) > 0
+                p = plot_trajectories(traj, account_names)
+            else
+                p = plot_trajectories(traj)
+            end
+            savefig(p, file_name)
+            println("$(file_name) plotted")
+        end
+    end
 
     println()
 end
