@@ -73,11 +73,30 @@ struct Account <: AbstractAccount
     value::Float64
     growth_rate::Float64  # annual
     updates::Array{AccountUpdate, 1}
+    share_price::Union{AbstractAccount, Nothing}
+    num_shares::Float64    # only active with share_price
+    strike_price::Float64  # only active with share_price
 
-    Account(name::AbstractString, value::Float64) = new(name, value, 0.0, [])
-    Account(name::AbstractString, value::Float64, growth_rate::Float64) = new(name, value, growth_rate, [])
-    Account(name::AbstractString, value::Float64, updates::Array{AccountUpdate, 1}) = new(name, value, 0.0, updates)
-    Account(name::AbstractString, value::Float64, growth_rate::Float64, updates::Array{AccountUpdate, 1}) = new(name, value, growth_rate, updates)
+    Account(name::AbstractString, value::Float64) = new(name, value, 0.0, [], nothing, 0.0, 0.0)
+    Account(name::AbstractString, value::Float64, growth_rate::Float64) = new(name, value, growth_rate, [], nothing, 0.0, 0.0)
+    Account(name::AbstractString, value::Float64, updates::Array{AccountUpdate, 1}) = new(name, value, 0.0, updates, nothing, 0.0, 0.0)
+
+    function Account(name::AbstractString,
+                     value::Float64,
+                     growth_rate::Float64,
+                     updates::Array{AccountUpdate, 1})
+        new(name, value, growth_rate, updates, nothing, 0.0, 0.0)
+    end
+
+    function Account(name::AbstractString,
+                     share_price::AbstractAccount,
+                     num_shares::Float64,
+                     strike_price::Float64,
+                     updates::Array{AccountUpdate, 1})
+        value = share_price.value * num_shares
+        new(name, value, 0.0, updates, share_price, num_shares, strike_price)
+    end
+
 end
 
 Base.show(io::IO, account::Account) = show(io, string(account.name, ": ", account.value))
@@ -395,12 +414,18 @@ function read_system_file(filename)
 
     # Build Accounts.
     accounts = Dict()
+    stock_accounts = Dict()
     transfer_updates = []
 
     if haskey(setup, "accounts")
         for account_info in setup["accounts"]
             name = string(account_info["name"])
-            value = account_info["value"]
+
+            if haskey(account_info, "value")
+                value = account_info["value"]
+            else
+                value = 0.0
+            end
 
             account_updates = Array{AccountUpdate, 1}()
             if haskey(account_info, "updates")
@@ -424,12 +449,28 @@ function read_system_file(filename)
             end
 
             if haskey(account_info, "growth_rate")
+                # Account with set growth_rate.
                 growth_rate = account_info["growth_rate"]
                 account = Account(name, value, growth_rate, account_updates)
+            elseif haskey(account_info, "share_price")
+                # Stock option Account.
+                account_info["account_updates"] = account_updates
+                stock_accounts[name] = account_info
             else
                 account = Account(name, value, account_updates)
             end
             accounts[name] = account
+        end
+
+        # Create stock option Accounts.
+        # These Accounts need existing share_price Accounts in order to
+        # initialize their starting values.
+        for (name, stock_account) in stock_accounts
+            share_price = accounts[stock_account["share_price"]]
+            num_shares = stock_account["num_shares"]
+            strike_price = stock_account["strike_price"]
+            account_updates = stock_account["account_updates"]
+            accounts[name] = Account(name, share_price, num_shares, strike_price, account_updates)
         end
 
         # Loop through AccountUpdates with transfers.
