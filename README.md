@@ -53,9 +53,19 @@ Here is an example setup file:
         account_group: Group1
         stop_date: 2028-08-05
 
+    plots:
+      - file_name: all_values.svg
+        trajectory: net worth
+      - file_name: total_value.svg
+        trajectory: net worth
+        account_names:
+          - "total"
+
 In this system, there are three `Accounts` (A, B, and C), one `AccountGroup` (Group1) consisting of all three `Accounts`, and one `BlingTrajectory` (net worth) that will track Group1 values from today until 2028-08-05.  `Account` A has a starting value of 10,000 and changes based on three regular `AccountUpdates`: one that adds 1200 every Friday, one that removes 2600 on the 3rd of each month, and one that transfers 200 every Friday to `Account` C.  This could represent a weekly paycheck of $1200, a monthly housing payment of $2600, and a weekly transfer of $200 to a savings account.  `Account` B starts at 50,000 and has a yearly growth rate of 0.08, or 8%, and could represent some investment.  The growth of B will actually be applied daily so there is no need to specify a recurrence time.  `Account` C starts with 2000, and only changes when funds are transferred from `Account` A.  Notice that transfers only need to be specified from one side.  The `transfer_to` entry within `Account` A's third update will automatically set up a corresponding addition of 200 to `Account` C.
 
-The only `AccountGroup` in this file is Group1 consisting of all three `Accounts`.  When the simulation is run, it will record the daily values of the `Accounts` as well as the total value of Group1.  The net worth `BlingTrajectory` will be run based on Group1.  By default the starting date is the current day.  The `stop_date` is when the simulation will end, and it should be in YYYY-MM-DD format.  The `BlingTrajectory` stores all values in a DataFrame, and trajectories can be plotted to output SVG files.
+The only `AccountGroup` in this file is Group1 consisting of all three `Accounts`.  When the simulation is run, it will record the daily values of the `Accounts` as well as the total value of Group1.  The net worth `BlingTrajectory` will be run based on Group1.  By default the starting date is the current day.  The `stop_date` is when the simulation will end, and it should be in YYYY-MM-DD format.  The `BlingTrajectory` stores all values in a DataFrame, and trajectories can be plotted to output SVG files.  More than one trajectory can be specified.
+
+Finally, once all trajectories have been run, plots can be generated.  In this case, there is a default plot saved to the file all_values.svg.  This has value over time plotted for each `Account` in the net worth `BlingTrajectory`.  If you want plots just for specific `Accounts`, those can be specified through the `account_names` list.  The second plot is saved to total_value.svg and only includes a single line for the sum of all `Account` values.  The totaled line is excluded from the default plot (having no `account_names` list) because it tends to have a wildly different scale from the individual `Accounts`.
 
 
 Dependencies
