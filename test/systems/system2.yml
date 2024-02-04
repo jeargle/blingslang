@@ -1,0 +1,32 @@
+accounts:
+  - name: ABC
+    value: 50.0
+    growth_rate: 0.08
+  - name: options1
+    share_price: ABC
+    num_shares: 500
+    strike_price: 10.0
+  - name: options2
+    share_price: ABC
+    num_shares: 500
+    strike_price: 40.0
+
+account_groups:
+  - accounts:
+    - ABC
+    - options1
+    - options2
+    name: Group1
+
+trajectories:
+  - name: options
+    account_group: Group1
+    stop_date: 2034-08-05
+
+plots:
+  - file_name: all_options.svg
+    trajectory: options
+  - file_name: total_options.svg
+    trajectory: options
+    account_names:
+      - total

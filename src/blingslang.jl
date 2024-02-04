@@ -471,15 +471,14 @@ function read_system_file(filename)
             if haskey(account_info, "growth_rate")
                 # Account with set growth_rate.
                 growth_rate = account_info["growth_rate"]
-                account = Account(name, value, growth_rate, account_updates)
+                accounts[name] = Account(name, value, growth_rate, account_updates)
             elseif haskey(account_info, "share_price")
                 # Stock option Account.
                 account_info["account_updates"] = account_updates
                 stock_accounts[name] = account_info
             else
-                account = Account(name, value, account_updates)
+                accounts[name] = Account(name, value, account_updates)
             end
-            accounts[name] = account
         end
 
         # Create stock option Accounts.
@@ -487,8 +486,12 @@ function read_system_file(filename)
         # initialize their starting values.
         for (name, stock_account) in stock_accounts
             share_price = accounts[stock_account["share_price"]]
-            num_shares = stock_account["num_shares"]
-            strike_price = stock_account["strike_price"]
+            num_shares = float(stock_account["num_shares"])
+            if haskey(stock_account, "strike_price")
+                strike_price = float(stock_account["strike_price"])
+            else
+                strike_price = 0.0
+            end
             account_updates = stock_account["account_updates"]
             accounts[name] = Account(name, share_price, num_shares, strike_price, account_updates)
         end
