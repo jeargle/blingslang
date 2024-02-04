@@ -93,7 +93,7 @@ struct Account <: AbstractAccount
                      num_shares::Float64,
                      strike_price::Float64,
                      updates::Array{AccountUpdate, 1})
-        value = share_price.value * num_shares
+        value = (share_price.value - strike_price) * num_shares
         new(name, value, 0.0, updates, share_price, num_shares, strike_price)
     end
 
@@ -316,7 +316,7 @@ end
 
 
 """
-    get_next_value(date, account, previous_value)
+    get_next_value(date, account, previous_value, share_price)
 
 Get the value of an account at the next timestep.
 
@@ -324,14 +324,17 @@ Get the value of an account at the next timestep.
 - date::Date
 - account::Account
 - previous_value
+- share_price
 
 # Returns
 - next value
 """
-function get_next_value(date::Date, account::Account, previous_value)
+function get_next_value(date::Date, account::Account, previous_value, share_price=nothing)
     if account.growth_rate != 0.0
         time = 1.0/365.0
         next_value = previous_value * (1.0 + account.growth_rate)^time
+    elseif account.share_price != nothing
+        next_value = (share_price - account.strike_price) * account.num_shares
     else
         next_value = previous_value
     end
@@ -368,15 +371,32 @@ function simulate(traj::BlingTrajectory)
     # Skip first index which is for timestep.
     account_to_index = Dict(a => i+1 for (i, a) in enumerate(traj.account_group.accounts))
 
+    # Order Accounts so that dependencies are processed correctly.
+    accounts = Array{Account, 1}()
+    stock_accounts = Array{Account, 1}()
+    for a in traj.account_group.accounts
+        if a.share_price == nothing
+            push!(accounts, a)
+        else
+            push!(stock_accounts, a)
+        end
+    end
+    accounts = vcat(accounts, stock_accounts)
+
     for timestep in range(traj.start_date+Day(1), traj.stop_date)
         next_values = Vector{Any}([timestep])
         previous_values = last(traj.trajectories)
         account_transfers = DefaultDict{Account, Float64}(0.0)
         total = 0.0
 
-        for a in traj.account_group.accounts
+        for a in accounts
             previous_value = previous_values[Symbol(a.name)]
-            next_value, next_transfers = get_next_value(timestep, a, previous_value)
+            if a.share_price != nothing
+                share_price = next_values[account_to_index[a.share_price]]
+            else
+                share_price = nothing
+            end
+            next_value, next_transfers = get_next_value(timestep, a, previous_value, share_price)
             push!(next_values, next_value)
             for (target, transfer_val) in next_transfers
                 account_transfers[target] += transfer_val
