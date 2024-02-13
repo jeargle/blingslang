@@ -17,7 +17,7 @@ Simulations are set up through simple, YAML-based config files.  This makes it e
 Setup File
 ----------
 
-The main three sections of the YAML system setup file are: `accounts`, `account_groups`, and `trajectories`.  Each `Account`, its starting value, and its growth parameters is defined in the `accounts` section.  `AccountGroups`, collections of `Accounts`, are defined in the `account_groups` section.  `BlingTrajectories` are value-over-time trajectories for `Accounts` and `AccountGroups`, and they are specified in the `trajectories` section.
+The main four sections of the YAML system setup file are: `accounts`, `account_groups`, `trajectories`, and `plots`.  Each `Account`, its starting value, and its growth parameters is defined in the `accounts` section.  `AccountGroups`, collections of `Accounts`, are defined in the `account_groups` section.  `BlingTrajectories` are value-over-time trajectories for `Accounts` and `AccountGroups`, and they are specified in the `trajectories` section.  Finally, the `plots` section hold information about trajectory plots that will be created after the simulation is run.  These plots end up in their own image files.
 
 Here is an example setup file:
 
@@ -66,6 +66,38 @@ In this system, there are three `Accounts` (A, B, and C), one `AccountGroup` (Gr
 The only `AccountGroup` in this file is Group1 consisting of all three `Accounts`.  When the simulation is run, it will record the daily values of the `Accounts` as well as the total value of Group1.  The net worth `BlingTrajectory` will be run based on Group1.  By default the starting date is the current day.  The `stop_date` is when the simulation will end, and it should be in YYYY-MM-DD format.  The `BlingTrajectory` stores all values in a DataFrame, and trajectories can be plotted to output SVG files.  More than one trajectory can be specified.
 
 Finally, once all trajectories have been run, plots can be generated.  In this case, there is a default plot saved to the file all_values.svg.  This has value over time plotted for each `Account` in the net worth `BlingTrajectory`.  If you want plots just for specific `Accounts`, those can be specified through the `account_names` list.  The second plot is saved to total_value.svg and only includes a single line for the sum of all `Account` values.  The totaled line is excluded from the default plot (having no `account_names` list) because it tends to have a wildly different scale from the individual `Accounts`.
+
+Here is a setup file modeling shares and options tied to a specific stock:
+
+    accounts:
+      - name: XYZ
+        value: 1.5
+        growth_rate: 0.2
+      - name: XYZ_shares
+        share_price: XYZ
+        num_shares: 4500
+      - name: XYZ_options
+        share_price: XYZ
+        num_shares: 8000
+        strike_price: 1.3
+
+    account_groups:
+      - name: stock_group
+        accounts:
+        - XYZ
+        - XYZ_shares
+        - XYZ_options
+
+    trajectories:
+      - name: stock
+        account_group: stock_group
+        stop_date: 2028-08-05
+
+    plots:
+      - file_name: stock_values.svg
+        trajectory: stock
+
+The XYZ stock price is set up as a normal `Account`.  XYZ_shares is tied to XYZ through the `share_price`, and `num_shares` is the number of XYZ shares in the `Account`.  There is no `value` field because the value is calculated as `share_price * num_shares`.  XYZ_options is similar to XYZ_shares except that there is also a `strike_price` which contributes to the value as `(share_price - strike_price) * num_shares`.  Both XYZ_shares and XYZ_options follow the XYZ share price.  All 3 `Accounts` are grouped into the stock_group `AccountGroup` which is then used by the stock `BlingTrajectory`.  At the end a plot for all 3 `Accounts` is made and saved to stock_values.svg.
 
 
 Dependencies
