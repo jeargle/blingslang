@@ -175,11 +175,11 @@ Base.show(io::IO, m::MIME"text/plain", bt::BlingTrajectory) = show(io, m, bt.nam
 Get the future value for an Account.
 
 # Arguments
-- account::Account
-- time::Float64: fraction of a year
+- `account::Account`
+- `time::Float64`: fraction of a year
 
 # Returns
-- value of an Account after time has passed
+- `Float64`: value of an Account after time has passed
 """
 function value_at_time(account::Account, time::Float64)
     return account.value * (1.0 + account.growth_rate)^time
@@ -192,7 +192,7 @@ end
 Get the value of an AccountGroup.
 
 # Arguments
-- account_group::AccountGroup
+- `account_group::AccountGroup`
 
 # Returns
 - total value of all Accounts in AccountGroup
@@ -205,10 +205,10 @@ end
 """
     initial_value(traj)
 
-Get the initial value of an BlingTrajectory.
+Get the initial value of a BlingTrajectory.
 
 # Arguments
-- traj::BlingTrajectory
+- `traj::BlingTrajectory`
 
 # Returns
 - total initial value of all Accounts in a BlingTrajectory
@@ -224,7 +224,7 @@ end
 Get the last value of an BlingTrajectory.
 
 # Arguments
-- traj::BlingTrajectory
+- `traj::BlingTrajectory`
 
 # Returns
 - total current value of all Accounts in a BlingTrajectory
@@ -243,8 +243,8 @@ end
 Set the initial value for next date that an AccountUpdate should be applied.
 
 # Arguments
-- update::AccountUpdate
-- date::Date
+- `update::AccountUpdate`
+- `date::Date`: next timestamp
 """
 function init_next_date(update::AccountUpdate, date::Date)
     # "once" does not need to be handled
@@ -277,8 +277,8 @@ end
 Set the initial value for next date of all AccountUpdates within an AccountGroup.
 
 # Arguments
-- account_group::AccountGroup
-- date::Date
+- `account_group::AccountGroup`
+- `date::Date`: initial timestep
 """
 function init_next_date(account_group::AccountGroup, date::Date)
     for account in account_group.accounts
@@ -295,8 +295,8 @@ end
 Set the next date that an AccountUpdate should be applied.
 
 # Arguments
-- update::AccountUpdate
-- date::Date
+- `update::AccountUpdate`
+- `date::Date`: next timestep to apply update
 """
 function set_next_date(update::AccountUpdate, date::Date)
     # "once" does not need to be handled
@@ -318,13 +318,13 @@ end
 """
     get_next_value(date, account, previous_value, share_price)
 
-Get the value of an account at the next timestep.
+Get the value of an Account at the next timestep.
 
 # Arguments
-- date::Date
-- account::Account
-- previous_value
-- share_price
+- `date::Date`: next timestep
+- `account::Account`
+- `previous_value`: previous value of account
+- `share_price=nothing`:
 
 # Returns
 - next value
@@ -361,10 +361,7 @@ end
 Simulate a BlingTrajectory for a period of time.
 
 # Arguments
-- traj::BlingTrajectory
-
-# Returns
-- BlingTrajectory
+- `traj::BlingTrajectory`: trajectory to simulate
 """
 function simulate(traj::BlingTrajectory)
     init_next_date(traj.account_group, traj.start_date)
@@ -422,10 +419,10 @@ end
 Create a simulation system from a YAML setup file.
 
 # Arguments
-- filename: name of YAML setup file
+- `filename`: name of YAML setup file
 
 # Returns
-- Dict with "accounts", "account_groups", and "trajectories"
+- `Dict`: holds "accounts", "account_groups", and "trajectories"
 """
 function read_system_file(filename)
     setup = YAML.load(open(filename))
@@ -576,11 +573,11 @@ end
 """
     plot_trajectories(traj, account_names)
 
-Create a plot of Account values over time.
+Create a plot of values over time for specific Accounts.
 
 # Arguments
-- traj::BlingTrajectory
-- account_names
+- `traj::BlingTrajectory`: trajectory to plot
+- `account_names`: list of Account names to plot
 
 # Returns
 - plot object
@@ -598,10 +595,10 @@ end
 """
     plot_trajectories(traj)
 
-Create a plot of Account values over time.
+Create a plot of values over time for all Accounts.
 
 # Arguments
-- traj::BlingTrajectory
+- `traj::BlingTrajectory`: trajectory to plot
 
 # Returns
 - plot object
@@ -617,10 +614,10 @@ end
 """
     plot_trajectory(traj)
 
-Create a plot of AccountGroup value over time.
+Create a plot of value over time for the entire AccountGroup .
 
 # Arguments
-- traj::BlingTrajectory
+- `traj::BlingTrajectory`: trajectory to plot
 
 # Returns
 - plot object
