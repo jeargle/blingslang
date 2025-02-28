@@ -1,4 +1,4 @@
-#!/usr/local/bin/julia
+#!/usr/local/bin/julia --project=..
 
 # John Eargle (mailto: jeargle at gmail.com)
 # blingsim

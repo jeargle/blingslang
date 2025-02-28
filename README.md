@@ -100,6 +100,18 @@ Here is a setup file modeling shares and options tied to a specific stock:
 The XYZ stock price is set up as a normal `Account`.  XYZ_shares is tied to XYZ through the `share_price`, and `num_shares` is the number of XYZ shares in the `Account`.  There is no `value` field because the value is calculated as `share_price * num_shares`.  XYZ_options is similar to XYZ_shares except that there is also a `strike_price` which contributes to the value as `(share_price - strike_price) * num_shares`.  Both XYZ_shares and XYZ_options follow the XYZ share price.  All 3 `Accounts` are grouped into the stock_group `AccountGroup` which is then used by the stock `BlingTrajectory`.  At the end a plot for all 3 `Accounts` is made and saved to stock_values.svg.
 
 
+How to Run
+----------
+
+blingslang has a commandline script `blingsim.jl` that reads a config file and runs the specified simulation.  For example, to run the test simulation in `system2.yml`, which models a company ABC's share price and two sets of options for shares in ABC, navigate to `blingslang/bin` and run
+
+```
+> ./blingsim.jl ../test/systems/system2.yml
+```
+
+Two SVG files will be printed out holding plots specified in `system2.yml`.
+
+
 Dependencies
 ------------
 
