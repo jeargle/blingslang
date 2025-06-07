@@ -51,13 +51,13 @@ Entrypoint for blingslang simulation script.
 """
 function main()
     aps = ArgParseSettings()
-    @add_arg_table! aps begin
+    @add_arg_table aps begin
         "configfile"
             help = "YAML system configuration file"
             required = true
     end
 
-    parsed_args = parse_args(ARGS, aps)
+    parsed_args = parse_args(aps)
 
     read_file_and_simulate(parsed_args["configfile"])
 end
