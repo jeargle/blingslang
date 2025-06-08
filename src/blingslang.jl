@@ -422,7 +422,7 @@ Create a simulation system from a YAML setup file.
 - `filename`: name of YAML setup file
 
 # Returns
-- `Dict`: holds "accounts", "account_groups", and "trajectories"
+- `Dict`: holds "accounts", "account_groups", "trajectories", and "plots"
 """
 function read_system_file(filename)
     setup = YAML.load(open(filename))
@@ -561,6 +561,13 @@ function read_system_file(filename)
         for account_name in get(plot_info, "account_names", [])
             push!(plot["account_names"], account_name)
         end
+        plot["account_sums"] = []
+        for account_sum in get(plot_info, "account_sums", [])
+            sum_spec = Dict()
+            sum_spec["sum_name"] = account_sum["sum_name"]
+            sum_spec["account_names"] = [name for name in account_sum["account_names"]]
+            push!(plot["account_sums"], sum_spec)
+        end
         push!(plots, plot)
     end
 
@@ -582,11 +589,21 @@ Create a plot of values over time for specific Accounts.
 # Returns
 - plot object
 """
-function plot_trajectories(traj::BlingTrajectory, account_names)
+function plot_trajectories(traj::BlingTrajectory; account_names=[], account_sums=[])
+    # Collect data for specific Accounts.
     x = traj.trajectories.date
     ys = [traj.trajectories[!, Symbol(an)] for an in account_names]
 
-    p = plot(x, ys, label=permutedims(account_names), title="Balance over time", xlabel="Date", ylabel="Balance")
+    line_names = copy(account_names)
+
+    # Collect data for summed sets of Accounts.
+    for sum_spec in account_sums
+        traj_sum = sum([traj.trajectories[!, Symbol(an)] for an in sum_spec["account_names"]])
+        push!(ys, traj_sum)
+        push!(line_names, sum_spec["sum_name"])
+    end
+
+    p = plot(x, ys, label=permutedims(line_names), title="Balance over time", xlabel="Date", ylabel="Balance")
 
     return p
 end
@@ -605,7 +622,7 @@ Create a plot of values over time for all Accounts.
 """
 function plot_trajectories(traj::BlingTrajectory)
     account_names = [a.name for a in traj.account_group.accounts]
-    p = plot_trajectories(traj, account_names)
+    p = plot_trajectories(traj, account_names=account_names)
 
     return p
 end

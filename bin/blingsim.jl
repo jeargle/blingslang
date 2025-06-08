@@ -30,8 +30,9 @@ function read_file_and_simulate(filename)
             file_name = plot["file_name"]
             traj = system["trajectories"][plot["trajectory"]]
             account_names = plot["account_names"]
-            if length(account_names) > 0
-                p = plot_trajectories(traj, account_names)
+            account_sums = plot["account_sums"]
+            if length(account_names) > 0 || length(account_sums) > 0
+                p = plot_trajectories(traj, account_names=account_names, account_sums=account_sums)
             else
                 p = plot_trajectories(traj)
             end

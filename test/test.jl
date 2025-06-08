@@ -155,15 +155,15 @@ function test_plot_trajectories()
     savefig(p, "all_values.svg")
     println("all values plotted")
 
-    p = plot_trajectories(bt1, [a1.name])
+    p = plot_trajectories(bt1, account_names=[a1.name])
     savefig(p, "bank_value.svg")
     println("bank value plotted")
 
-    p = plot_trajectories(bt1, [a3.name])
+    p = plot_trajectories(bt1, account_names=[a3.name])
     savefig(p, "retirement_value.svg")
     println("retirement value plotted")
 
-    p = plot_trajectories(bt1, ["total"])
+    p = plot_trajectories(bt1, account_names=["total"])
     savefig(p, "total_value.svg")
     println("total value plotted")
 
