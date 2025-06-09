@@ -578,13 +578,14 @@ end
 
 
 """
-    plot_trajectories(traj, account_names)
+    plot_trajectories(traj; account_names, account_sums)
 
 Create a plot of values over time for specific Accounts.
 
 # Arguments
 - `traj::BlingTrajectory`: trajectory to plot
 - `account_names`: list of Account names to plot
+- `account_sums`: list of lists of Account names to sum and plot
 
 # Returns
 - plot object
@@ -623,26 +624,6 @@ Create a plot of values over time for all Accounts.
 function plot_trajectories(traj::BlingTrajectory)
     account_names = [a.name for a in traj.account_group.accounts]
     p = plot_trajectories(traj, account_names=account_names)
-
-    return p
-end
-
-
-"""
-    plot_trajectory(traj)
-
-Create a plot of value over time for the entire AccountGroup .
-
-# Arguments
-- `traj::BlingTrajectory`: trajectory to plot
-
-# Returns
-- plot object
-"""
-function plot_trajectory(traj::BlingTrajectory)
-    x = traj.trajectories.date
-    ys = [traj.trajectories[!, Symbol(an)] for an in account_names]
-    p = plot(x, ys)
 
     return p
 end
