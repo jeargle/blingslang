@@ -193,7 +193,7 @@ function test_read_file_and_simulate()
         traj = system["trajectories"][plot["trajectory"]]
         account_names = plot["account_names"]
         if length(account_names) > 0
-            p = plot_trajectories(traj, account_names)
+            p = plot_trajectories(traj, account_names=account_names)
         else
             p = plot_trajectories(traj)
         end
