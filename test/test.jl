@@ -97,6 +97,21 @@ function test_account_group()
     println()
 end
 
+function test_account_dag()
+    print_test_header("AccountDag")
+
+    a1 = Account("bank", 5000.00)
+    a2 = Account("house", 250000.00)
+    a3 = Account("retirement", 60000.00)
+    nodes = [a1, a2, a3]
+    edges = [(a1, a2), (a2, a3)]
+    ad1 = AccountDag(nodes, edges)
+    # println(ag1)
+    # println("ag1: $ag1")
+
+    println()
+end
+
 function test_bling_trajectory()
     print_test_header("BlingTrajectory")
 
@@ -209,8 +224,11 @@ function main()
     test_account_update()
     test_account()
     test_account_group()
+    test_account_dag()
+
     test_bling_trajectory()
     test_simulate()
+
     test_plot_trajectories()
     test_read_system_file()
     test_read_file_and_simulate()

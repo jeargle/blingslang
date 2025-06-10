@@ -15,7 +15,7 @@ using YAML
 
 # Account
 include("account.jl")
-export AccountUpdate, Account, AccountGroup, Economy
+export AccountUpdate, Account, AccountGroup, Economy, AccountDag
 export value_at_time, current_value, init_next_date, set_next_date, get_next_value
 
 # Simulation

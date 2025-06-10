@@ -38,7 +38,6 @@ mutable struct AccountUpdate
         end
         new(value_change, recurrence, 0, nothing, target_account)
     end
-
 end
 
 Base.show(io::IO, update::AccountUpdate) = show(io, string(update.value_change, ", ", update.recurrence, ", ", update.day))
@@ -79,7 +78,6 @@ struct Account <: AbstractAccount
         value = (share_price.value - strike_price) * num_shares
         new(name, value, 0.0, updates, share_price, num_shares, strike_price)
     end
-
 end
 
 Base.show(io::IO, account::Account) = show(io, string(account.name, ": ", account.value))
@@ -94,6 +92,7 @@ Organizational structure for a set of Accounts.
 struct AccountGroup
     name::AbstractString
     accounts::Array{Account, 1}
+
     AccountGroup(name::AbstractString, accounts::Array{Account, 1}) = new(name, accounts)
 end
 
@@ -107,11 +106,26 @@ Economy model.
 struct Economy
     name::AbstractString
     accounts::Array{Account, 1}
-    AccountGroup(name::AbstractString, accounts::Array{Account, 1}) = new(name, accounts)
+
+    Economy(name::AbstractString, accounts::Array{Account, 1}) = new(name, accounts)
 end
 
 Base.show(io::IO, ag::Economy) = show(io, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
 Base.show(io::IO, m::MIME"text/plain", account::Economy) = show(io, m, string(ag.name, ": ", sum([a.value for a in ag.accounts])))
+
+
+"""
+Dependency DAG of Accounts.
+"""
+struct AccountDag
+    nodes::Array{Account, 1}
+    edges::Array{Tuple{Account, Account}, 1}
+
+    function AccountDag(nodes::Array{Account, 1},
+                        edges::Array{Tuple{Account, Account}, 1})
+        new(nodes, edges)
+    end
+end
 
 
 """
