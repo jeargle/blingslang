@@ -120,10 +120,24 @@ Dependency DAG of Accounts.
 struct AccountDag
     nodes::Array{Account, 1}
     edges::Array{Tuple{Account, Account}, 1}
+    children::Dict{Account, Array{Account, 1}}
+    parents::Dict{Account, Array{Account, 1}}
 
     function AccountDag(nodes::Array{Account, 1},
                         edges::Array{Tuple{Account, Account}, 1})
-        new(nodes, edges)
+        children = Dict{Account, Array{Account, 1}}()
+        parents = Dict{Account, Array{Account, 1}}()
+        for node in nodes
+            children[node] = Array{Account, 1}()
+            parents[node] = Array{Account, 1}()
+        end
+
+        for (parent, child) in edges
+            push!(children[parent], child)
+            push!(parents[child], parent)
+        end
+
+        new(nodes, edges, children, parents)
     end
 end
 

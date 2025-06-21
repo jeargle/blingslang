@@ -103,11 +103,15 @@ function test_account_dag()
     a1 = Account("bank", 5000.00)
     a2 = Account("house", 250000.00)
     a3 = Account("retirement", 60000.00)
-    nodes = [a1, a2, a3]
-    edges = [(a1, a2), (a2, a3)]
+    a4 = Account("vacation", 10000.00)
+    nodes = [a1, a2, a3, a4]
+    edges = [(a1, a2), (a2, a3), (a1, a4)]
     ad1 = AccountDag(nodes, edges)
-    # println(ag1)
-    # println("ag1: $ag1")
+
+    println("ad1.children[a1]:")
+    println(ad1.children[a1])
+    println("ad1.parents[a2]:")
+    println(ad1.parents[a2])
 
     println()
 end
