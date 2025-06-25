@@ -13,6 +13,7 @@ using Dates
 
 using Plots
 using Printf
+using Test
 
 using blingslang
 
@@ -30,24 +31,48 @@ function test_account_update()
     au1 = AccountUpdate(100.0, "once", "2020-04-01")
     println(au1)
     println("au1: $au1")
+    @test au1.value_change == 100.0
+    @test au1.recurrence == "once"
+    @test au1.day == 0
+    @test au1.next_date == Date("2020-04-01")
+
 
     au2 = AccountUpdate(1500.0, "weekly", "Thursday")
     println("au2: $au2")
+    @test au2.value_change == 1500.0
+    @test au2.recurrence == "weekly"
+    @test au2.day == 4
+    # @test au1.next_date == Date("2020-04-01")
 
     au3 = AccountUpdate(-2500.0, "monthly", "3")
     println("au3: $au3")
+    @test au3.value_change == -2500.0
+    @test au3.recurrence == "monthly"
+    @test au3.day == 3
 
-    au4 = AccountUpdate(-2500.0, "yearly", "3")
+    au4 = AccountUpdate(-2400.0, "yearly", "3")
     println("au4: $au4")
+    @test au4.value_change == -2400.0
+    @test au4.recurrence == "yearly"
+    @test au4.day == 3
 
     au5 = AccountUpdate(-5.0, "daily")
     println("au5: $au5")
+    @test au5.value_change == -5.0
+    @test au5.recurrence == "daily"
+    @test au5.day == 0
 
-    au6 = AccountUpdate(-2500.0, "monthly", 3)
+    au6 = AccountUpdate(-2300.0, "monthly", 3)
     println("au6: $au6")
+    @test au6.value_change == -2300.0
+    @test au6.recurrence == "monthly"
+    @test au6.day == 3
 
-    au7 = AccountUpdate(-2500.0, "yearly", 3)
+    au7 = AccountUpdate(-2200.0, "yearly", 3)
     println("au7: $au7")
+    @test au7.value_change == -2200.0
+    @test au7.recurrence == "yearly"
+    @test au7.day == 3
 
     println()
 end
