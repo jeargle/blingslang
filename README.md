@@ -118,6 +118,7 @@ Dependencies
 * ArgParse
 * DataFrames
 * DataStructures
+* Dates
 * Plots
 * Printf
 * Random
