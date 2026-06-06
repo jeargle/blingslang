@@ -15,6 +15,10 @@ Create a plot of values over time for specific Accounts.
 - plot object
 """
 function plot_trajectories(traj::BlingTrajectory; account_names=[], account_sums=[])
+    if length(account_names) == 0
+        account_names = [a.name for a in traj.account_group.accounts]
+    end
+
     # Collect data for specific Accounts.
     x = traj.trajectories.date
     ys = [traj.trajectories[!, Symbol(an)] for an in account_names]
@@ -29,25 +33,6 @@ function plot_trajectories(traj::BlingTrajectory; account_names=[], account_sums
     end
 
     p = plot(x, ys, label=permutedims(line_names), title="Balance over time", xlabel="Date", ylabel="Balance")
-
-    return p
-end
-
-
-"""
-    plot_trajectories(traj)
-
-Create a plot of values over time for all Accounts.
-
-# Arguments
-- `traj::BlingTrajectory`: trajectory to plot
-
-# Returns
-- plot object
-"""
-function plot_trajectories(traj::BlingTrajectory)
-    account_names = [a.name for a in traj.account_group.accounts]
-    p = plot_trajectories(traj, account_names=account_names)
 
     return p
 end
