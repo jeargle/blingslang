@@ -21,7 +21,7 @@ account_groups:
 trajectories:
   - name: options
     account_group: Group1
-    stop_date: 2034-08-05
+    stop_date: "2034-08-05"
 
 plots:
   - file_name: all_options.svg

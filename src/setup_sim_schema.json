@@ -1,0 +1,141 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "accounts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number"
+                    },
+                    "growth_rate": {
+                        "type": "number"
+                    },
+                    "updates": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "value_change": {
+                                    "type": "number"
+                                },
+                                "recurrence": {
+                                    "type": "string"
+                                },
+                                "day": {
+                                    "type": ["string", "integer"]
+                                },
+                                "transfer_to": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "value_change",
+                                "recurrence"
+                            ],
+                            "title": "Update"
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "value"
+                ],
+                "title": "Account"
+            }
+        },
+        "account_groups": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "accounts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "accounts"
+                ],
+                "title": "AccountGroup"
+            }
+        },
+        "trajectories": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "account_group": {
+                        "type": "string"
+                    },
+                    "stop_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "account": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "account_group",
+                    "stop_date"
+                ],
+                "title": "Trajectory"
+            }
+        },
+        "plots": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "trajectory": {
+                        "type": "string"
+                    },
+                    "account_names": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "file_name",
+                    "trajectory"
+                ],
+                "title": "Plot"
+            }
+        }
+    },
+    "required": [
+        "accounts",
+        "account_groups",
+        "trajectories"
+    ],
+    "title": "SetupSim"
+}

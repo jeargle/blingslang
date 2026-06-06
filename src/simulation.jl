@@ -143,7 +143,16 @@ Create a simulation system from a YAML setup file.
 - `Dict`: holds "accounts", "account_groups", "trajectories", and "plots"
 """
 function read_system_file(filename)
+    schema_path = joinpath(@__DIR__, "setup_sim_schema.json")
+    setup_sim_schema = Schema(JSON.parse(open(schema_path)))
+
     setup = YAML.load(open(filename))
+
+    validation_error = validate(setup_sim_schema, setup)
+    if validation_error !== nothing
+        println(validation_error)
+        error("Broken setup file")
+    end
 
     system = Dict()
 
