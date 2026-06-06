@@ -119,6 +119,7 @@ Dependencies
 * DataFrames
 * DataStructures
 * Dates
+* JSONSchema
 * Plots
 * Printf
 * Random
